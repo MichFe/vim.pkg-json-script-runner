@@ -48,6 +48,10 @@ end
 
 function M.telescope_package_scripts()
   local scripts = get_json_scripts()
+  if #scripts == 0 then
+    vim.notify("No scripts found in package.json", vim.log.levels.WARN)
+    return
+  end
 
   pickers.new({}, {
     prompt_title = "NPM Scripts",
@@ -58,6 +62,10 @@ function M.telescope_package_scripts()
     attach_mappings = function(_, map)
       local run_script = function(prompt_bufnr)
         local selection = action_state.get_selected_entry()
+        if not selection or not selection[1] then
+          vim.notify("No script selected", vim.log.levels.WARN)
+          return
+        end
         actions.close(prompt_bufnr)
         run_npm_script(selection[1])
       end
