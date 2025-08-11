@@ -31,7 +31,7 @@ local get_json_file = function()
   end
   table.sort(scripts)
 
-  print(scripts)
+  print(vim.inspect(scripts))
   return scripts
 
 end
