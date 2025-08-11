@@ -77,21 +77,7 @@ local function run_npm_script(script)
       vim.schedule(function()
         vim.notify("npm script exited with code: " .. code, vim.log.levels.INFO)
         job_id = nil
-
-        if bufnr and vim.api.nvim_buf_is_valid(bufnr) then
-          -- Close all windows showing this buffer
-          local wins = vim.fn.win_findbuf(bufnr)
-          for _, win in ipairs(wins) do
-            vim.api.nvim_win_close(win, true)
-          end
-
-          -- Delete the buffer
-          if vim.api.nvim_buf_is_valid(bufnr) then
-            vim.api.nvim_buf_delete(bufnr, { force = true })
-          end
-
-          bufnr = nil
-        end
+        -- Do NOT close the buffer or window here — keep terminal open until manual close
       end)
     end,
   })
