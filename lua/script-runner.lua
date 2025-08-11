@@ -5,7 +5,8 @@ end
 
 local get_json_scripts = function()
   local package_json_path = vim.fn.getcwd() .. '/package.json'
-  print(package_json_path)
+  -- Comment out or remove debug prints when stable
+  -- print(package_json_path)
 
   local file = io.open(package_json_path, "r")
   if not file then
@@ -28,9 +29,62 @@ local get_json_scripts = function()
   end
   table.sort(scripts)
 
-  print(vim.inspect(scripts))
+  -- print(vim.inspect(scripts))
   return scripts
+end
 
+-- State to track running job and buffer
+local job_id = nil
+local bufnr = nil
+
+local function stop_npm_script()
+  if job_id then
+    vim.fn.jobstop(job_id)
+    job_id = nil
+  end
+  if bufnr and vim.api.nvim_buf_is_valid(bufnr) then
+    vim.api.nvim_buf_delete(bufnr, { force = true })
+    bufnr = nil
+  end
+end
+
+local function run_npm_script(script)
+  -- Stop old job and buffer first
+  stop_npm_script()
+
+  -- Create a new buffer for terminal
+  bufnr = vim.api.nvim_create_buf(false, true)
+
+  -- Open a floating window (adjust size/position as you want)
+  local width = math.floor(vim.o.columns * 0.6)
+  local height = math.floor(vim.o.lines * 0.6)
+  local row = math.floor((vim.o.lines - height) / 2)
+  local col = math.floor((vim.o.columns - width) / 2)
+
+  vim.api.nvim_open_win(bufnr, true, {
+    relative = "editor",
+    width = width,
+    height = height,
+    row = row,
+    col = col,
+    style = "minimal",
+    border = "rounded",
+  })
+
+  -- Start terminal job inside buffer
+  job_id = vim.fn.termopen("npm run " .. script, {
+    on_exit = function(_, code, _)
+      vim.schedule(function()
+        vim.notify("npm script exited with code: " .. code, vim.log.levels.INFO)
+        job_id = nil
+        -- Optionally close the buffer/window automatically:
+        -- if bufnr and vim.api.nvim_buf_is_valid(bufnr) then
+        --   vim.api.nvim_buf_delete(bufnr, { force = true })
+        --   bufnr = nil
+        -- end
+      end)
+    end,
+  })
 end
 
 -- Telescope integration
@@ -39,12 +93,6 @@ local finders = require("telescope.finders")
 local conf = require("telescope.config").values
 local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
-
-local function run_npm_script(script)
-  print("Running script: " .. script)
-  -- Opens a terminal and runs the script
-  vim.cmd("vsplit | terminal npm run " .. script)
-end
 
 function M.telescope_package_scripts()
   local scripts = get_json_scripts()
@@ -78,5 +126,9 @@ function M.telescope_package_scripts()
   }):find()
 end
 
+-- Optionally expose stop function for manual stopping
+M.stop_npm_script = stop_npm_script
+
 print("Json runner loaded")
 return M
+
