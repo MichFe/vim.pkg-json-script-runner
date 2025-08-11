@@ -11,6 +11,7 @@ local get_json_file = function()
   print(package_json_path)
 end
 
+print("Json runner loaded")
 get_json_file()
 
 return M
