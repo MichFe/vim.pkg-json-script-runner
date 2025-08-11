@@ -41,6 +41,7 @@ local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 
 local function run_npm_script(script)
+  print("Running script: " .. script)
   -- Opens a terminal and runs the script
   vim.cmd("vsplit | terminal npm run " .. script)
 end
@@ -69,8 +70,11 @@ local function telescope_package_scripts()
   }):find()
 end
 
+vim.keymap.set("n", ";s", telescope_package_scripts, {
+  noremap = true,
+  silent = true,
+  desc = "Run NPM script",
+})
 
 print("Json runner loaded")
-telescope_package_scripts()
-
 return M
