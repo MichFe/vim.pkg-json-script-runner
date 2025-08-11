@@ -4,9 +4,6 @@ M.setup = function()
 end
 
 local get_json_scripts = function()
-end
-
-local get_json_file = function()
   local package_json_path = vim.fn.getcwd() .. '/package.json'
   print(package_json_path)
 
@@ -37,6 +34,6 @@ local get_json_file = function()
 end
 
 print("Json runner loaded")
-get_json_file()
+get_json_scripts()
 
 return M
