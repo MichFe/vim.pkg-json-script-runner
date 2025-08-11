@@ -46,7 +46,7 @@ local function run_npm_script(script)
   vim.cmd("vsplit | terminal npm run " .. script)
 end
 
-local function telescope_package_scripts()
+function M.telescope_package_scripts()
   local scripts = get_json_scripts()
 
   pickers.new({}, {
