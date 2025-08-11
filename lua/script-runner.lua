@@ -33,7 +33,44 @@ local get_json_scripts = function()
 
 end
 
+-- Telescope integration
+local pickers = require("telescope.pickers")
+local finders = require("telescope.finders")
+local conf = require("telescope.config").values
+local actions = require("telescope.actions")
+local action_state = require("telescope.actions.state")
+
+local function run_npm_script(script)
+  -- Opens a terminal and runs the script
+  vim.cmd("vsplit | terminal npm run " .. script)
+end
+
+local function telescope_package_scripts()
+  local scripts = get_json_scripts()
+
+  pickers.new({}, {
+    prompt_title = "NPM Scripts",
+    finder = finders.new_table {
+      results = scripts,
+    },
+    sorter = conf.generic_sorter({}),
+    attach_mappings = function(_, map)
+      local run_script = function(prompt_bufnr)
+        local selection = action_state.get_selected_entry()
+        actions.close(prompt_bufnr)
+        run_npm_script(selection[1])
+      end
+
+      map("i", "<CR>", run_script)
+      map("n", "<CR>", run_script)
+
+      return true
+    end,
+  }):find()
+end
+
+
 print("Json runner loaded")
-get_json_scripts()
+telescope_package_scripts()
 
 return M
