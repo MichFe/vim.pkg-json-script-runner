@@ -70,11 +70,5 @@ local function telescope_package_scripts()
   }):find()
 end
 
-vim.keymap.set("n", ";s", telescope_package_scripts, {
-  noremap = true,
-  silent = true,
-  desc = "Run NPM script",
-})
-
 print("Json runner loaded")
 return M
